@@ -11,54 +11,58 @@ ES EL SIGUIENTE:
 npm i faker@5.5.3 -s*/
 const faker = require('faker');
 
+const ProductsService = require('./../services/product.service');
+const service = new ProductsService();
+
 //2) REQUERIR ROUTER
 const router = express.Router();
 
 //CREAMOS NUESTRA PRIMERA RUTA CON METODO GET
 //PARA OBTENER TODOS LOS PRODUCTOS
 router.get('/', (req,res) => {
-    //CREAMOS UN ARRAY(LISTA) VACIO DE PRODUCTOS
-    const products = [];
-    //REQUERIMOS UN PARAMETRO OPCIONAL PARA SABER CUANTOS
-    //PRODUCTOS VAMOS A TRAER
-    const { size } = req.query; //req.query son parametros opcionales
-    const limit = size || 10; // || significa 'OR' o 'O' //productos?size=10
-    //En caso de no recibir un tama;o, limit sera 10
-    //REALIZAMOS UN CICLO PARA CREAR LOS PRODUCTOS
-    for(let index = 0; index < limit; index++) {
-        //Agregando productos falsos al array de productos
-        //Funcion push sirve para agregar elementos al array
-        products.push({
-            name: faker.commerce.productName(),
-            price: parseInt(faker.commerce.price(), 10),
-            image: faker.image.imageUrl(),
-        });
-    }
+    const products = service.find();
     //DEVUELVE EL ARRAY DE PRODUCTOS COMO UN JSON
     res.json(products);
-}); 
-
-router.get('/:id', (req,res) => {
-    // const id = req.params.id;
-    const { id } = req.params;
-    if (id === '999') {
-        res.status(404).json({
-            message: 'Not found'
-        })
-    } else {
-        res.status(200).json({
-            name: 'Product',
-            price: 100
-        })
-    }
 });
 
+
+//LLAMAR A UN PRODUCTO ESPECIFICO
+// :id ES UN PARAMETRO QUE SE RECIBE EN LA URL
+router.get('/:id', (req,res) => {
+    // const id = req.params.id;
+    const { id } = req.params; //Declarando el parametro que recibimos y lo guardamos
+    //en una variable
+    const product = service.findOne(id)
+    res.json(product);
+});
+
+
+//RUTA POST PARA CREAR PRODUCTOS
 router.post('/', (req, res) => {
     const body = req.body;
-    res.json({
-        message: 'created',
-        data: body
-    })
+    const newProduct = service.create(body)
+    res.status(201).json(newProduct);
 })
+
+//ACTUALIZAR UN PRODUCTO PARCIALMENTE
+router.patch('/:id', (req, res) => {
+    const { id } = req.params; //req.params para indicar que es un parametro
+    //REQUERIMOS QUE SE QUIERE ACTUALIZAR
+    const body = req.body;
+    //UNA RESPUESTA
+    res.json({
+        message: 'update',
+        data: body,
+        id
+    });
+});
+
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    res.json({
+        message: 'deleted',
+        id
+    });
+});
 
 module.exports = router;
