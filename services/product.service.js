@@ -1,3 +1,4 @@
+const { response } = require("express");
 const faker = require("faker");
 
 class ProductsService {
@@ -6,7 +7,7 @@ class ProductsService {
     this.generate();
   }
 
-  generate() {
+   async generate() {
     const limit = 100;
     //REALIZAMOS UN CICLO PARA CREAR LOS PRODUCTOS
     for (let index = 0; index < limit; index++) {
@@ -21,7 +22,7 @@ class ProductsService {
     }
   }
 
-  create(data) {
+  async create(data) {
 		const newProduct = {
 			id: faker.datatype.uuid(),
 			...data 
@@ -33,16 +34,51 @@ class ProductsService {
 	}
 
   find() {
-    return  this.products;
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(this.products)
+      }, 5000);
+    })
   }
 
-  findOne(id) {
+  async findOne(id) {
     return this.products.find(item => item.id === id)
   }
 
-  update() {}
+  async update(id, changes) {
+    //BUSCO EL ELEMENTO DENTRO DEL ARRAY
+    const index = this.products.findIndex(item => item.id === id);
+    //ENVIO UN ERROR EN CASO DE QUE NO EXISTA
+    if (index === -1){
+      //ERROR ES UNA CLASE PROPIA DE JS PARA ARROJAR MENSAJES DE ERROR
+      throw new Error('product not found');
+      //Si hay un error, la ejecucion de la funcion se para
+    }
+    //CREO UNA VARIABLE PARA CARGAR EL PRODUCTO QUE VOY A MODIFICAR
+    //(Una vez obtenido su indice)
+    const product = this.products[index];
+    //Cargo las propiedades que el producto ya tiene
+    //y sus cambios
+    this.products[index] = {
+      ...product,
+      ...changes
+    }
+    //RETORNAR EL PRODUCTO
+    return this.products[index];
+  }
 
-  delete() {}
+  async delete(id) {
+    //BUSCO EL ELEMENTO DENTRO DEL ARRAY
+    const index = this.products.findIndex(item => item.id === id);
+    //ENVIO UN ERROR EN CASO DE QUE NO EXISTA
+    if (index === -1){
+      //ERROR ES UNA CLASE PROPIA DE JS PARA ARROJAR MENSAJES DE ERROR
+      throw new Error('product not found');
+      //Si hay un error, la ejecucion de la funcion se para
+    }
+    this.products.splice(index, 1);
+    return { id }
+  }
 }
 
 module.exports = ProductsService;

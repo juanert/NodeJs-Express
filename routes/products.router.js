@@ -19,8 +19,11 @@ const router = express.Router();
 
 //CREAMOS NUESTRA PRIMERA RUTA CON METODO GET
 //PARA OBTENER TODOS LOS PRODUCTOS
-router.get('/', (req,res) => {
-    const products = service.find();
+//METODO ASINCRONO PARA NO OCUPAR LA PILA DE TAREAS PRINCIPAL
+//Y PODER TRABAJAR CON MUCHAS PETICIONES AL MISMO TIEMPO
+router.get('/', async (req,res) => {
+    //COMO EL SERVICIO ES ASINCRONO, QUEDA ESPERANDO UNA PROMESA.
+    const products = await service.find();
     //DEVUELVE EL ARRAY DE PRODUCTOS COMO UN JSON
     res.json(products);
 });
@@ -28,41 +31,35 @@ router.get('/', (req,res) => {
 
 //LLAMAR A UN PRODUCTO ESPECIFICO
 // :id ES UN PARAMETRO QUE SE RECIBE EN LA URL
-router.get('/:id', (req,res) => {
+router.get('/:id', async (req,res) => {
     // const id = req.params.id;
     const { id } = req.params; //Declarando el parametro que recibimos y lo guardamos
     //en una variable
-    const product = service.findOne(id)
+    const product = await service.findOne(id)
     res.json(product);
 });
 
 
 //RUTA POST PARA CREAR PRODUCTOS
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const body = req.body;
-    const newProduct = service.create(body)
+    const newProduct = await service.create(body)
     res.status(201).json(newProduct);
 })
 
 //ACTUALIZAR UN PRODUCTO PARCIALMENTE
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
     const { id } = req.params; //req.params para indicar que es un parametro
     //REQUERIMOS QUE SE QUIERE ACTUALIZAR
-    const body = req.body;
-    //UNA RESPUESTA
-    res.json({
-        message: 'update',
-        data: body,
-        id
-    });
+    const body = req.body; 
+    const product = await service.update(id, body)
+    res.json(product);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    res.json({
-        message: 'deleted',
-        id
-    });
+    const answer = await service.delete(id);
+    res.json(answer);
 });
 
 module.exports = router;
