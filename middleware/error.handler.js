@@ -12,4 +12,13 @@ function errorHandler(err, req, res, next) { //no todos los parametros tienen po
     })
 }
 
-module.exports = { logErrors, errorHandler }; //Permitimos exportar las funciones que creamos
+//Manejador con BOOM, libreria que automaticamente selecciona el tipo de error y mensaje
+function boomErrorHandler(err, req, res, next) {
+    if (err.isBoom) {
+        const { output } = err;
+        res.status(output.statusCode).json(output.payload);
+    }
+    next(err);
+}
+
+module.exports = { logErrors, errorHandler, boomErrorHandler }; //Permitimos exportar las funciones que creamos
