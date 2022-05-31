@@ -13,7 +13,7 @@ const { logErrors, errorHandler, boomErrorHandler } = require('./middleware/erro
 const app = express();
 const port = 3000;
 
-app.get(express.json());
+app.use(express.json());
 //LISTA BLANCAS DE SITIOS PERMITIDOS
 const whitelist = ['http://localhost:8080', 'https://myapp.co'];
 const options = {
@@ -43,7 +43,6 @@ app.get('/', (req,res) => {
 //DENOTAR QUE ESTAMOS ENVIANDOLE EXPRESS COMO PARAMETRO
 //FUNCION UBICADA EN CARPETA ROUTES, ARCHIVO INDEX.JS
 routerApi(app);
-
 //LOS MIDDLEWARES TIENEN QUE SER UTILIZADOS LUEGO DE LAS RUTAS
 app.use(logErrors);
 app.use(boomErrorHandler);
